@@ -12,6 +12,12 @@
     "ecmaVersion": "latest"
   },
   "rules": {
-    "no-multiple-empty-lines": "off"
+    "no-multiple-empty-lines": "off",
+    "no-underscore-dangle": "off",
+    "import/no-extraneous-dependencies": "off",
+    "import/extensions": "off",
+    "import/no-unresolved": "off",
+    "class-methods-use-this": "off",
+    "object-curly-newline": "off"
   }
 }
