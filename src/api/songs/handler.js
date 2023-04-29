@@ -9,13 +9,15 @@ class SongsHandler {
 
   async postSongHandler(request, h) {
     this._validator.validateCreateOrUpdateSongPayload(request.payload);
-    const { title, year, genre, performer, duration } = request.payload;
+    const { title, year, genre, performer, duration, albumId = '' } = request.payload;
+
     const songId = await this._service.addSong({
       title,
       year,
       genre,
       performer,
       duration,
+      albumId,
     });
 
     const response = await h.response({
@@ -27,8 +29,9 @@ class SongsHandler {
     return response;
   }
 
-  async getSongsHandler(_, h) {
-    const songs = await this._service.getSongs();
+  async getSongsHandler(request, h) {
+    const { title, performer } = request.query;
+    const songs = await this._service.getSongs({ title, performer });
 
     const response = await h.response({
       status: 'success',

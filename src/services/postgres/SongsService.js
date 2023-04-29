@@ -9,24 +9,36 @@ class SongsService {
     this._pool = new Pool();
   }
 
-  async addSong({ title, year, genre, performer, duration }) {
+  async addSong({ title, year, genre, performer, duration, albumId }) {
     const id = nanoid(16);
     const createdAt = Math.floor(new Date().getTime() / 1000.0);
     const updatedAt = createdAt;
 
     const query = {
-      text: 'INSERT INTO songs (id, title, year, genre, performer, duration, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-      values: [id, title, year, genre, performer, duration, createdAt, updatedAt],
+      text: 'INSERT INTO songs (id, title, year, genre, performer, duration, album_id, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
+      values: [id, title, year, genre, performer, duration, albumId, createdAt, updatedAt],
     };
 
     const result = await this._pool.query(query);
     if (!result.rows[0].id) throw new InvariantError('Song gagal ditambahkan');
-
     return result.rows[0].id;
   }
 
-  async getSongs() {
-    const query = 'SELECT * FROM songs';
+  async getSongs({ title, performer }) {
+    let query = 'SELECT * FROM songs';
+
+    if (title) {
+      query = `SELECT * FROM songs WHERE LOWER(title) LIKE '%${title}%'`;
+    }
+
+    if (performer) {
+      query = `SELECT * FROM songs WHERE LOWER(performer) LIKE '%${performer}%'`;
+    }
+
+    if (title && performer) {
+      query = `SELECT * FROM songs WHERE LOWER(title) LIKE '%${title}%' AND LOWER(performer) LIKE '%${performer}%'`;
+    }
+
     const result = await this._pool.query(query);
     return result.rows.map(songTransform.songList);
   }

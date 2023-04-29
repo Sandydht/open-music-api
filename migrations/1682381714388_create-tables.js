@@ -53,8 +53,8 @@ exports.up = (pgm) => {
       type: 'INT',
       notNull: true,
     },
-    albumId: {
-      type: 'TEXT',
+    album_id: {
+      type: 'VARCHAR(50)',
       notNull: false,
     },
     created_at: {
