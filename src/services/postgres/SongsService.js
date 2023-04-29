@@ -9,14 +9,14 @@ class SongsService {
     this._pool = new Pool();
   }
 
-  async addSong({ title, year, genre, performer, duration, albumId }) {
+  async addSong({ title, year, genre, performer, duration }) {
     const id = nanoid(16);
     const createdAt = Math.floor(new Date().getTime() / 1000.0);
     const updatedAt = createdAt;
 
     const query = {
-      text: 'INSERT INTO songs (id, title, year, genre, performer, duration, albumId, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
-      values: [id, title, year, genre, performer, duration, albumId, createdAt, updatedAt],
+      text: 'INSERT INTO songs (id, title, year, genre, performer, duration, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      values: [id, title, year, genre, performer, duration, createdAt, updatedAt],
     };
 
     const result = await this._pool.query(query);
@@ -27,7 +27,7 @@ class SongsService {
 
   async getSongs() {
     const query = 'SELECT * FROM songs';
-    const result = await this._pool(query);
+    const result = await this._pool.query(query);
     return result.rows.map(songTransform.songList);
   }
 
@@ -43,11 +43,11 @@ class SongsService {
     return result.rows.map(songTransform.songDetail)[0];
   }
 
-  async editSongById(id, { title, year, genre, performer, duration, albumId }) {
+  async editSongById(id, { title, year, genre, performer, duration }) {
     const updatedAt = Math.floor(new Date().getTime() / 1000.0);
     const query = {
-      text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, albumId = $6, updated_at = $7 WHERE id = $8 RETURNING id',
-      values: [title, year, genre, performer, duration, albumId, updatedAt, id],
+      text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, updated_at = $6 WHERE id = $7 RETURNING id',
+      values: [title, year, genre, performer, duration, updatedAt, id],
     };
 
     const result = await this._pool.query(query);

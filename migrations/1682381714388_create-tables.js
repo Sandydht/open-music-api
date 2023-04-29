@@ -45,17 +45,17 @@ exports.up = (pgm) => {
       type: 'TEXT',
       notNull: true,
     },
-    peformer: {
+    performer: {
       type: 'TEXT',
       notNull: true,
     },
     duration: {
-      type: 'FLOAT8',
+      type: 'INT',
       notNull: true,
     },
     albumId: {
       type: 'TEXT',
-      notNull: true,
+      notNull: false,
     },
     created_at: {
       type: 'TEXT',
