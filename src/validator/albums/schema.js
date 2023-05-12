@@ -1,10 +1,16 @@
 const Joi = require('joi');
 
-const CreateOrUpdateAlbumSchema = Joi.object({
+const CreateAlbumPayloadSchema = Joi.object({
+  name: Joi.string().trim().required(),
+  year: Joi.number().required(),
+});
+
+const UpdateAlbumPayloadSchema = Joi.object({
   name: Joi.string().trim().required(),
   year: Joi.number().required(),
 });
 
 module.exports = {
-  CreateOrUpdateAlbumSchema,
+  CreateAlbumPayloadSchema,
+  UpdateAlbumPayloadSchema,
 };

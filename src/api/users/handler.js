@@ -2,23 +2,19 @@ const autoBind = require('auto-bind');
 
 class UsersHandler {
   constructor(service, validator) {
-    this._service = service;
-    this._validator = validator;
+    this.service = service;
+    this.validator = validator;
     autoBind(this);
   }
 
   async postUserHandler(request, h) {
-    this._validator.validateUserPayload(request.payload);
-    const { username, password, fullname } = request.payload;
-
-    const userId = await this._service.addUser({ username, password, fullname });
+    this.validator.validateUserPayload(request.payload);
+    const userId = await this.service.addUser(request.payload);
 
     const response = h.response({
       status: 'success',
       message: 'User berhasil ditambahkan',
-      data: {
-        userId,
-      },
+      data: { userId },
     });
     response.code(201);
     return response;
@@ -26,13 +22,11 @@ class UsersHandler {
 
   async getUserByIdHandler(request) {
     const { id } = request.params;
-    const user = await this._service.getUserById(id);
+    const user = await this.service.getUserById(id);
 
     return {
       status: 'success',
-      data: {
-        user,
-      },
+      data: { user },
     };
   }
 }

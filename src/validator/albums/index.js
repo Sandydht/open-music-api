@@ -1,10 +1,14 @@
-const { CreateOrUpdateAlbumSchema } = require('~/validator/albums/schema');
-const InvariantError = require('~/exceptions/InvariantError');
+const { CreateAlbumPayloadSchema, UpdateAlbumPayloadSchema } = require('./schema');
+const InvariantError = require('../../exceptions/InvariantError');
 
 const AlbumsValidator = {
-  validateCreateOrUpdateAlbumPayload: (payload) => {
-    const validationResult = CreateOrUpdateAlbumSchema.validate(payload);
-    if (validationResult?.error) throw new InvariantError(validationResult?.error?.message);
+  validateCreateAlbumPayload: (payload) => {
+    const validationResult = CreateAlbumPayloadSchema.validate(payload);
+    if (validationResult.error) throw new InvariantError(validationResult.error.message);
+  },
+  validateUpdateAlbumPayload: (payload) => {
+    const validationResult = UpdateAlbumPayloadSchema.validate(payload);
+    if (validationResult.error) throw new InvariantError(validationResult.error.message);
   },
 };
 
