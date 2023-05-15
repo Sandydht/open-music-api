@@ -23,6 +23,7 @@ class SongsService {
 
     const result = await this.pool.query(query);
     if (!result.rows[0].id) throw new InvariantError('Song gagal ditambahkan');
+
     return result.rows[0].id;
   }
 
@@ -32,19 +33,15 @@ class SongsService {
       values: [],
     };
 
-    if (title) {
-      query.text = 'SELECT * FROM SONGS WHERE LOWER(title) LIKE %$1%';
-      query.values = [title];
-    }
-
-    if (performer) {
-      query.text = 'SELECT * FROM songs WHERE LOWER(performer) LIKE %$1%';
-      query.values = [performer];
-    }
-
     if (title && performer) {
-      query.text = 'SELECT * FROM songs WHERE LOWER(title) LIKE %$1% AND LOWER(performer) LIKE %$2%';
-      query.values = [title, performer];
+      query.text = 'SELECT * FROM songs WHERE LOWER(title) LIKE LOWER($1) AND LOWER(performer) LIKE LOWER($2)';
+      query.values = [`%${title}%`, `%${performer}%`];
+    } else if (title) {
+      query.text = 'SELECT * FROM songs WHERE LOWER(title) LIKE LOWER($1)';
+      query.values = [`%${title}%`];
+    } else if (performer) {
+      query.text = 'SELECT * FROM songs WHERE LOWER(performer) LIKE LOWER($1)';
+      query.values = [`%${performer}%`];
     }
 
     const result = await this.pool.query(query);
