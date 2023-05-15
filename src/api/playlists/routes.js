@@ -23,6 +23,14 @@ const routes = (handler) => [
       auth: 'musics_app',
     },
   },
+  {
+    method: 'POST',
+    path: '/playlists/{id}/songs',
+    handler: handler.postSongToPlaylist,
+    options: {
+      auth: 'musics_app',
+    },
+  },
 ];
 
 module.exports = routes;
