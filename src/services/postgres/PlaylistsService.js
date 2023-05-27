@@ -28,7 +28,7 @@ class PlaylistsService {
 
   async getPlaylists(owner) {
     const query = {
-      text: 'SELECT * FROM playlists INNER JOIN users ON playlists.owner = users.id WHERE playlists.owner = $1',
+      text: 'SELECT * FROM users INNER JOIN playlists ON users.id = playlists.owner WHERE playlists.owner = $1',
       values: [owner],
     };
 
@@ -63,7 +63,7 @@ class PlaylistsService {
 
   async getPlaylistByIdWithSongs(id) {
     const playlistsQuery = {
-      text: 'SELECT * FROM playlists INNER JOIN users on playlists.owner = users.id WHERE playlists.id = $1',
+      text: 'SELECT * FROM users INNER JOIN playlists on users.id = playlists.owner WHERE playlists.id = $1',
       values: [id],
     };
 
@@ -83,10 +83,10 @@ class PlaylistsService {
     return result;
   }
 
-  async deletePlaylistSong(playlistId, songId) {
+  async deletePlaylistSong(songId) {
     const playlistSongsQuery = {
-      text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 RETURNING id',
-      values: [playlistId],
+      text: 'DELETE FROM playlist_songs WHERE song_id = $1 RETURNING song_id',
+      values: [songId],
     };
 
     const songsQuery = {
@@ -99,7 +99,7 @@ class PlaylistsService {
       this.pool.query(songsQuery),
     ]);
 
-    if (!playlistSongs.rows[0].id) throw new NotFoundError('Playlist song gagal dihapus. Id tidak ditemukan');
+    if (!playlistSongs.rows[0].song_id) throw new NotFoundError('Playlist song gagal dihapus. Song id tidak ditemukan');
     if (!songs.rows[0].id) throw new NotFoundError('Song gagal dihapus. Id tidak ditemukan');
   }
 
@@ -124,16 +124,6 @@ class PlaylistsService {
 
     const result = await this.pool.query(query);
     if (!result.rowCount) throw new NotFoundError('Song tidak ditemukan');
-  }
-
-  async verifyPlaylistSongByPlaylistId(id) {
-    const query = {
-      text: 'SELECT * FROM playlist_songs WHERE playlist_id = $1',
-      values: [id],
-    };
-
-    const result = await this.pool.query(query);
-    if (!result.rowCount) throw new NotFoundError('Playlist song tidak ditemukan');
   }
 }
 

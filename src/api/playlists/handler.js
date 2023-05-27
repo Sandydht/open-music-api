@@ -84,11 +84,8 @@ class PlaylistsHandler {
     const { songId } = request.payload;
 
     await this.service.verifyPlaylistByOwner(id, credentialId);
-    await Promise.all([
-      this.service.verifyPlaylistSongByPlaylistId(id),
-      this.service.verifySongById(songId),
-    ]);
-    await this.service.deletePlaylistSong(id, songId);
+    await this.service.verifySongById(songId);
+    await this.service.deletePlaylistSong(songId);
 
     return {
       status: 'success',
