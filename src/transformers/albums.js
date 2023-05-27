@@ -1,14 +1,18 @@
-const transformer = {};
-transformer.albumDetail = ({
-  id, name, year, songs,
-}) => ({
-  id, name, year, songs: songs.map((song) => transformer.songDetail(song)),
+const songsTransform = require('./songs');
+
+const albumDetail = (data) => ({
+  id: data && data.id,
+  name: data && data.name,
+  year: data && data.year,
 });
 
-transformer.songDetail = ({
-  id, title, performer,
-}) => ({
-  id, title, performer,
+const albumDetailWithSongs = (data) => ({
+  ...albumDetail(data),
+  songs: data && data.songs && Array.isArray(data.songs) && data.songs.length > 0
+    ? data.songs.map((song) => songsTransform.showSong(song)) : [],
 });
+
+const transformer = {};
+transformer.showAlbumWithSongs = (data) => albumDetailWithSongs(data);
 
 module.exports = transformer;

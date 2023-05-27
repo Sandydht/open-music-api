@@ -52,11 +52,7 @@ class SongsHandler {
 
   async deleteSongByIdHandler(request) {
     const { id } = request.params;
-
-    await Promise.all([
-      this.service.deleteSongById(id),
-      this.service.deleteSongFromPlaylist(id),
-    ]);
+    await this.service.deleteSongById(id);
 
     return {
       status: 'success',

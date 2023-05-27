@@ -9,7 +9,8 @@ class AlbumsService {
     this.pool = new Pool();
   }
 
-  async addAlbum({ name, year }) {
+  async addAlbum(payload) {
+    const { name, year } = payload;
     const id = nanoid(16);
     const createdAt = Math.floor(new Date().getTime() / 1000.0);
     const updatedAt = createdAt;
@@ -35,18 +36,19 @@ class AlbumsService {
       values: [id],
     };
 
-    const [albumsResult, songsResult] = await Promise.all([
-      await this.pool.query(albumsQuery),
-      await this.pool.query(songsQuery),
+    const [albums, songs] = await Promise.all([
+      this.pool.query(albumsQuery),
+      this.pool.query(songsQuery),
     ]);
-    if (!albumsResult.rowCount) throw new NotFoundError('Album tidak ditemukan');
+    if (!albums.rowCount) throw new NotFoundError('Album tidak ditemukan');
 
-    albumsResult.rows[0].songs = songsResult.rows;
-    const album = albumsResult.rows.map(albumsTransform.albumDetail)[0];
-    return album;
+    albums.rows[0].songs = songs.rows;
+    const result = albumsTransform.showAlbumWithSongs(albums.rows[0]);
+    return result;
   }
 
-  async editAlbumById(id, { name, year }) {
+  async editAlbumById(id, payload) {
+    const { name, year } = payload;
     const updatedAt = Math.floor(new Date().getTime() / 1000.0);
     const query = {
       text: 'UPDATE albums SET name = $1, year = $2, updated_at = $3 WHERE id = $4 RETURNING id',
