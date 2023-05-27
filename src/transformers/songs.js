@@ -5,10 +5,8 @@ const songList = (data) => ({
 });
 
 const songDetail = (data) => ({
-  id: data && data.id,
-  title: data && data.title,
+  ...songList(data),
   year: data && data.year,
-  performer: data && data.performer,
   genre: data && data.genre,
   duration: data && data.duration,
   albumId: data && data.albumId,

@@ -11,7 +11,7 @@ class PlaylistsHandler {
     this.validator.validateAddPlaylistPayload(request.payload);
     const { id: credentialId } = request.auth.credentials;
 
-    const playlistId = await this.service.addPlaylist({ ...request.payload, owner: credentialId });
+    const playlistId = await this.service.addPlaylist(request.payload, credentialId);
     const response = h.response({
       status: 'success',
       message: 'Playlist berhasil ditambahkan',
@@ -52,7 +52,7 @@ class PlaylistsHandler {
 
     await this.service.verifyPlaylistByOwner(playlistId, credentialId);
     await this.service.verifySongById(songId);
-    const playlistSongId = await this.service.addSongToPlaylists({ playlistId, songId });
+    const playlistSongId = await this.service.addSongToPlaylists(playlistId, songId);
 
     const response = h.response({
       status: 'success',
@@ -61,6 +61,39 @@ class PlaylistsHandler {
     });
     response.code(201);
     return response;
+  }
+
+  async getPlaylistByIdWithSongsHandler(request) {
+    const { id: playlistId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this.service.verifyPlaylistByOwner(playlistId, credentialId);
+    const playlist = await this.service.getPlaylistByIdWithSongs(playlistId);
+
+    return {
+      status: 'success',
+      data: { playlist },
+    };
+  }
+
+  async deleteSongFromPlaylistHanlder(request) {
+    this.validator.validateDeleteSongFromPlaylistPayload(request.payload);
+
+    const { id } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+    const { songId } = request.payload;
+
+    await this.service.verifyPlaylistByOwner(id, credentialId);
+    await Promise.all([
+      this.service.verifyPlaylistSongByPlaylistId(id),
+      this.service.verifySongById(songId),
+    ]);
+    await this.service.deletePlaylistSong(id, songId);
+
+    return {
+      status: 'success',
+      message: 'Playlist song berhasil dihapus',
+    };
   }
 }
 

@@ -8,9 +8,25 @@ const routes = (handler) => [
     },
   },
   {
+    method: 'POST',
+    path: '/playlists/{id}/songs',
+    handler: handler.postSongToPlaylist,
+    options: {
+      auth: 'musics_app',
+    },
+  },
+  {
     method: 'GET',
     path: '/playlists',
     handler: handler.getPlaylistsHandler,
+    options: {
+      auth: 'musics_app',
+    },
+  },
+  {
+    method: 'GET',
+    path: '/playlists/{id}/songs',
+    handler: handler.getPlaylistByIdWithSongsHandler,
     options: {
       auth: 'musics_app',
     },
@@ -24,9 +40,9 @@ const routes = (handler) => [
     },
   },
   {
-    method: 'POST',
+    method: 'DELETE',
     path: '/playlists/{id}/songs',
-    handler: handler.postSongToPlaylist,
+    handler: handler.deleteSongFromPlaylistHanlder,
     options: {
       auth: 'musics_app',
     },

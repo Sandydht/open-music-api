@@ -3,13 +3,15 @@ const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
+const playlistsTransform = require('../../transformers/playlists');
 
 class PlaylistsService {
   constructor() {
     this.pool = new Pool();
   }
 
-  async addPlaylist({ name, owner }) {
+  async addPlaylist(payload, owner) {
+    const { name } = payload;
     const id = `playlist-${nanoid(16)}`;
     const createdAt = Math.floor(new Date().getTime() / 1000.0);
     const updatedAt = createdAt;
@@ -21,18 +23,18 @@ class PlaylistsService {
 
     const result = await this.pool.query(query);
     if (!result.rows[0].id) throw new InvariantError('Playlist gagal ditambahkan');
-
     return result.rows[0].id;
   }
 
   async getPlaylists(owner) {
     const query = {
-      text: 'SELECT pl.id, pl.name, users.username FROM playlists pl INNER JOIN users ON pl.owner = users.id WHERE pl.owner = $1',
+      text: 'SELECT * FROM playlists INNER JOIN users ON playlists.owner = users.id WHERE playlists.owner = $1',
       values: [owner],
     };
 
-    const result = await this.pool.query(query);
-    return result.rows;
+    const playlists = await this.pool.query(query);
+    const result = playlistsTransform.playlistList(playlists.rows);
+    return result;
   }
 
   async deletePlaylistById(id) {
@@ -45,7 +47,7 @@ class PlaylistsService {
     if (!result.rowCount) throw new NotFoundError('Playlist gagal dihapus. Id tidak ditemukan');
   }
 
-  async addSongToPlaylists({ playlistId, songId }) {
+  async addSongToPlaylists(playlistId, songId) {
     const id = `playlist-songs-${nanoid(16)}`;
     const createdAt = Math.floor(new Date().getTime() / 1000.0);
     const updatedAt = createdAt;
@@ -57,6 +59,48 @@ class PlaylistsService {
 
     const result = await this.pool.query(query);
     if (!result.rows[0].id) throw new InvariantError('Song gagal ditambahkan ke playlist');
+  }
+
+  async getPlaylistByIdWithSongs(id) {
+    const playlistsQuery = {
+      text: 'SELECT * FROM playlists INNER JOIN users on playlists.owner = users.id WHERE playlists.id = $1',
+      values: [id],
+    };
+
+    const plylistSongsQuery = {
+      text: 'SELECT * FROM playlist_songs INNER JOIN songs on playlist_songs.song_id = songs.id WHERE playlist_songs.playlist_id = $1',
+      values: [id],
+    };
+
+    const [playlists, playlistSongs] = await Promise.all([
+      this.pool.query(playlistsQuery),
+      this.pool.query(plylistSongsQuery),
+    ]);
+    if (!playlists.rowCount) throw new NotFoundError('Playlist tidak ditemukan');
+
+    playlists.rows[0].songs = playlistSongs.rows;
+    const result = playlistsTransform.showPlaylistWithSongs(playlists.rows[0]);
+    return result;
+  }
+
+  async deletePlaylistSong(playlistId, songId) {
+    const playlistSongsQuery = {
+      text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 RETURNING id',
+      values: [playlistId],
+    };
+
+    const songsQuery = {
+      text: 'DELETE FROM songs WHERE id = $1 RETURNING id',
+      values: [songId],
+    };
+
+    const [playlistSongs, songs] = await Promise.all([
+      this.pool.query(playlistSongsQuery),
+      this.pool.query(songsQuery),
+    ]);
+
+    if (!playlistSongs.rows[0].id) throw new NotFoundError('Playlist song gagal dihapus. Id tidak ditemukan');
+    if (!songs.rows[0].id) throw new NotFoundError('Song gagal dihapus. Id tidak ditemukan');
   }
 
   async verifyPlaylistByOwner(id, owner) {
@@ -80,6 +124,16 @@ class PlaylistsService {
 
     const result = await this.pool.query(query);
     if (!result.rowCount) throw new NotFoundError('Song tidak ditemukan');
+  }
+
+  async verifyPlaylistSongByPlaylistId(id) {
+    const query = {
+      text: 'SELECT * FROM playlist_songs WHERE playlist_id = $1',
+      values: [id],
+    };
+
+    const result = await this.pool.query(query);
+    if (!result.rowCount) throw new NotFoundError('Playlist song tidak ditemukan');
   }
 }
 
