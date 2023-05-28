@@ -1,4 +1,5 @@
 const autoBind = require('auto-bind');
+const SongsService = require('../../services/postgres/SongsService');
 
 class AlbumsHandler {
   constructor(service, validator) {
@@ -22,7 +23,14 @@ class AlbumsHandler {
 
   async getAlbumByIdHandler(request) {
     const { id } = request.params;
-    const album = await this.service.getAlbumById(id);
+    const songsService = new SongsService();
+
+    const [album, songs] = await Promise.all([
+      this.service.getAlbumById(id),
+      songsService.getSongByAlbumId(id),
+    ]);
+
+    album.songs = songs;
 
     return {
       status: 'success',

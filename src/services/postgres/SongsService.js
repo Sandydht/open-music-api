@@ -29,6 +29,7 @@ class SongsService {
 
   async getSongs(queryParams) {
     const { title, performer } = queryParams;
+
     const query = {
       text: 'SELECT * FROM songs',
       values: [],
@@ -63,11 +64,23 @@ class SongsService {
     return result;
   }
 
+  async getSongByAlbumId(albumId) {
+    const query = {
+      text: 'SELECT * FROM songs WHERE album_id = $1',
+      values: [albumId],
+    };
+
+    const songs = await this.pool.query(query);
+    const result = songsTransform.songList(songs.rows);
+    return result;
+  }
+
   async editSongById(id, payload) {
     const {
       title, year, genre, performer, duration,
     } = payload;
     const updatedAt = Math.floor(new Date().getTime() / 1000.0);
+
     const query = {
       text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, updated_at = $6 WHERE id = $7 RETURNING id',
       values: [title, year, genre, performer, duration, updatedAt, id],
@@ -82,6 +95,7 @@ class SongsService {
       text: 'DELETE FROM songs WHERE id = $1 RETURNING id',
       values: [id],
     };
+
     const result = await this.pool.query(query);
     if (!result.rowCount) throw new NotFoundError('Song gagal dihapus. Id tidak ditemukan');
   }

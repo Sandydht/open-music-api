@@ -26,24 +26,15 @@ class AlbumsService {
   }
 
   async getAlbumById(id) {
-    const albumsQuery = {
+    const query = {
       text: 'SELECT * FROM albums WHERE id = $1',
       values: [id],
     };
 
-    const songsQuery = {
-      text: 'SELECT * FROM songs WHERE album_id = $1',
-      values: [id],
-    };
+    const album = await this.pool.query(query);
+    if (!album.rowCount) throw new NotFoundError('Album tidak ditemukan');
 
-    const [albums, songs] = await Promise.all([
-      this.pool.query(albumsQuery),
-      this.pool.query(songsQuery),
-    ]);
-    if (!albums.rowCount) throw new NotFoundError('Album tidak ditemukan');
-
-    albums.rows[0].songs = songs.rows;
-    const result = albumsTransform.showAlbumWithSongs(albums.rows[0]);
+    const result = albumsTransform.showAlbum(album.rows[0]);
     return result;
   }
 
