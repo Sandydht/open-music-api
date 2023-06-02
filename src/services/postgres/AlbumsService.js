@@ -21,7 +21,7 @@ class AlbumsService {
     };
 
     const result = await this.pool.query(query);
-    if (!result.rows[0].id) throw new InvariantError('Album gagal ditambahkan');
+    if (!result.rowCount) throw new InvariantError('Album gagal ditambahkan');
     return result.rows[0].id;
   }
 

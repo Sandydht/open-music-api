@@ -23,7 +23,7 @@ class SongsService {
     };
 
     const result = await this.pool.query(query);
-    if (!result.rows[0].id) throw new InvariantError('Song gagal ditambahkan');
+    if (!result.rowCount) throw new InvariantError('Song gagal ditambahkan');
     return result.rows[0].id;
   }
 

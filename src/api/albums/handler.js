@@ -1,16 +1,16 @@
 const autoBind = require('auto-bind');
-const SongsService = require('../../services/postgres/SongsService');
 
 class AlbumsHandler {
-  constructor(service, validator) {
-    this.service = service;
+  constructor(albumsService, songsService, validator) {
+    this.albumsService = albumsService;
+    this.songsService = songsService;
     this.validator = validator;
     autoBind(this);
   }
 
   async postAlbumHandler(request, h) {
-    this.validator.validateCreateAlbumPayload(request.payload);
-    const albumId = await this.service.addAlbum(request.payload);
+    this.validator.validateAlbumPayload(request.payload);
+    const albumId = await this.albumsService.addAlbum(request.payload);
 
     const response = h.response({
       status: 'success',
@@ -23,13 +23,10 @@ class AlbumsHandler {
 
   async getAlbumByIdHandler(request) {
     const { id } = request.params;
-    const songsService = new SongsService();
-
     const [album, songs] = await Promise.all([
-      this.service.getAlbumById(id),
-      songsService.getSongByAlbumId(id),
+      this.albumsService.getAlbumById(id),
+      this.songsService.getSongByAlbumId(id),
     ]);
-
     album.songs = songs;
 
     return {
@@ -39,9 +36,9 @@ class AlbumsHandler {
   }
 
   async putAlbumByIdHandler(request) {
-    this.validator.validateUpdateAlbumPayload(request.payload);
+    this.validator.validateAlbumPayload(request.payload);
     const { id } = request.params;
-    await this.service.editAlbumById(id, request.payload);
+    await this.albumsService.editAlbumById(id, request.payload);
 
     return {
       status: 'success',
@@ -51,7 +48,7 @@ class AlbumsHandler {
 
   async deleteAlbumByIdHandler(request) {
     const { id } = request.params;
-    await this.service.deleteAlbumById(id);
+    await this.albumsService.deleteAlbumById(id);
 
     return {
       status: 'success',
