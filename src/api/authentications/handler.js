@@ -1,16 +1,16 @@
 const autoBind = require('auto-bind');
 
 class AuthenticationsHandler {
-  constructor(authenticationsService, usersService, tokenManager, validator) {
+  constructor(authenticationsService, usersService, TokenManager, AuthenticationsValidator) {
     this.authenticationsService = authenticationsService;
     this.usersService = usersService;
-    this.tokenManager = tokenManager;
-    this.validator = validator;
+    this.tokenManager = TokenManager;
+    this.authenticationsValidator = AuthenticationsValidator;
     autoBind(this);
   }
 
   async postAuthenticationHandler(request, h) {
-    this.validator.validatePostAuthenticationPayload(request.payload);
+    this.authenticationsValidator.validatePostAuthenticationPayload(request.payload);
     const { username, password } = request.payload;
     const id = await this.usersService.verifyUserCredential(username, password);
 
@@ -32,7 +32,7 @@ class AuthenticationsHandler {
   }
 
   async putAuthenticationHandler(request) {
-    this.validator.validatePutAuthenticationPayload(request.payload);
+    this.authenticationsValidator.validatePutAuthenticationPayload(request.payload);
     const { refreshToken } = request.payload;
 
     await this.authenticationsService.verifyRefreshToken(refreshToken);
@@ -49,7 +49,7 @@ class AuthenticationsHandler {
   }
 
   async deleteAuthenticationHandler(request) {
-    this.validator.validateDeleteAuthenticationPayload(request.payload);
+    this.authenticationsValidator.validateDeleteAuthenticationPayload(request.payload);
     const { refreshToken } = request.payload;
 
     await this.authenticationsService.verifyRefreshToken(refreshToken);
