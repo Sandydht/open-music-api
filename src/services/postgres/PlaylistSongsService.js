@@ -1,11 +1,14 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 const songsTransform = require('../../transformers/songs');
 
 class PlaylistSongsService {
-  constructor() {
+  constructor(playlistsService, collaborationsService) {
     this.pool = new Pool();
+    this.playlistsService = playlistsService;
+    this.collaborationsService = collaborationsService;
   }
 
   async addSongToPlaylist(playlistId, payload) {
@@ -43,6 +46,20 @@ class PlaylistSongsService {
 
     const result = await this.pool.query(query);
     if (!result.rowCount) throw new InvariantError('Lagu gagal dihapus dari playlist');
+  }
+
+  async verifyPlaylistSongAccess(playlistId, userId) {
+    await this.playlistsService.verifyPlaylistByOwner(playlistId, userId)
+      .catch(async (error) => {
+        if (error instanceof NotFoundError) {
+          throw error;
+        }
+
+        await this.collaborationsService.verifyCollaborator(playlistId, userId)
+          .catch((err) => {
+            throw err;
+          });
+      });
   }
 }
 

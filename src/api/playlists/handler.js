@@ -59,7 +59,7 @@ class PlaylistsHandler {
     const { songId } = request.payload;
 
     await Promise.all([
-      this.playlistsService.verifyPlaylistByOwner(id, credentialId),
+      this.playlistSongsService.verifyPlaylistSongAccess(id, credentialId),
       this.songsService.getSongById(songId),
     ]);
 
@@ -77,7 +77,7 @@ class PlaylistsHandler {
     const { id } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
-    await this.playlistsService.verifyPlaylistByOwner(id, credentialId);
+    await this.playlistSongsService.verifyPlaylistSongAccess(id, credentialId);
 
     const [playlist, songs] = await Promise.all([
       this.playlistsService.getPlaylistById(id),
@@ -99,7 +99,7 @@ class PlaylistsHandler {
     const { songId } = request.payload;
 
     await Promise.all([
-      this.playlistsService.verifyPlaylistByOwner(id, credentialId),
+      this.playlistSongsService.verifyPlaylistSongAccess(id, credentialId),
       this.songsService.getSongById(songId),
     ]);
 
