@@ -21,7 +21,7 @@ class UsersService {
     };
 
     const result = await this.pool.query(query);
-    if (!result.rows[0]) throw new InvariantError('User gagal ditambahkan');
+    if (!result.rowCount) throw new InvariantError('User gagal ditambahkan');
     return result.rows[0].id;
   }
 
@@ -43,7 +43,7 @@ class UsersService {
     };
 
     const result = await this.pool.query(query);
-    if (result.rowCount > 0) throw new InvariantError('Gagal menambahkan user. Username sudah digunakan.');
+    if (result.rowCount) throw new InvariantError('Gagal menambahkan user. Username sudah digunakan.');
   }
 
   async verifyUserCredential(username, password) {
