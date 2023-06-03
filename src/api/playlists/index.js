@@ -8,6 +8,7 @@ module.exports = {
     playlistsService,
     songsService,
     playlistSongsService,
+    playlistSongActivitiesService,
     PlaylistsValidator,
     PlaylistSongsValidator,
   }) => {
@@ -15,6 +16,7 @@ module.exports = {
       playlistsService,
       songsService,
       playlistSongsService,
+      playlistSongActivitiesService,
       PlaylistsValidator,
       PlaylistSongsValidator,
     );
