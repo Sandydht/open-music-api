@@ -1,15 +1,15 @@
 const autoBind = require('auto-bind');
 
 class UsersHandler {
-  constructor(service, validator) {
-    this.service = service;
-    this.validator = validator;
+  constructor(usersService, UsersValidator) {
+    this.usersService = usersService;
+    this.usersValidator = UsersValidator;
     autoBind(this);
   }
 
   async postUserHandler(request, h) {
-    this.validator.validateUserPayload(request.payload);
-    const userId = await this.service.addUser(request.payload);
+    this.usersValidator.validateUserPayload(request.payload);
+    const userId = await this.usersService.addUser(request.payload);
 
     const response = h.response({
       status: 'success',
@@ -22,7 +22,7 @@ class UsersHandler {
 
   async getUserByIdHandler(request) {
     const { id } = request.params;
-    const user = await this.service.getUserById(id);
+    const user = await this.usersService.getUserById(id);
 
     return {
       status: 'success',

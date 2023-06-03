@@ -44,6 +44,12 @@ const CollaborationsValidator = require('./validator/collaborations');
 // Playlist song activities
 const PlaylistSongActivitiesService = require('./services/postgres/PlaylistSongActivitiesService');
 
+// Exports
+// eslint-disable-next-line no-underscore-dangle
+const _exports = require('./api/exports');
+const ProducerService = require('./services/rabbitmq/ProducerService');
+const ExportsValidator = require('./validator/exports');
+
 const init = async () => {
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
@@ -95,21 +101,21 @@ const init = async () => {
       options: {
         albumsService,
         songsService,
-        validator: AlbumsValidator,
+        AlbumsValidator,
       },
     },
     {
       plugin: songs,
       options: {
-        service: songsService,
-        validator: SongsValidator,
+        songsService,
+        SongsValidator,
       },
     },
     {
       plugin: users,
       options: {
-        service: usersService,
-        validator: UsersValidator,
+        usersService,
+        UsersValidator,
       },
     },
     {
@@ -117,8 +123,8 @@ const init = async () => {
       options: {
         authenticationsService,
         usersService,
-        tokenManager: TokenManager,
-        validator: AuthenticationsValidator,
+        TokenManager,
+        AuthenticationsValidator,
       },
     },
     {
@@ -139,6 +145,14 @@ const init = async () => {
         usersService,
         collaborationsService,
         CollaborationsValidator,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        playlistsService,
+        ProducerService,
+        ExportsValidator,
       },
     },
   ]);

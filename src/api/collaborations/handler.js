@@ -5,12 +5,12 @@ class CollaborationsHandler {
     this.playlistsService = playlistsService;
     this.usersService = usersService;
     this.collaborationsService = collaborationsService;
-    this.CollaborationsValidator = CollaborationsValidator;
+    this.collaborationsValidator = CollaborationsValidator;
     autoBind(this);
   }
 
   async postCollaborationHandler(request, h) {
-    this.CollaborationsValidator.validateCollaborationPayload(request.payload);
+    this.collaborationsValidator.validateCollaborationPayload(request.payload);
     const { id: credentialId } = request.auth.credentials;
     const { playlistId, userId } = request.payload;
 
@@ -31,7 +31,7 @@ class CollaborationsHandler {
   }
 
   async deleteCollaborationHandler(request) {
-    this.CollaborationsValidator.validateCollaborationPayload(request.payload);
+    this.collaborationsValidator.validateCollaborationPayload(request.payload);
     const { id: credentialId } = request.auth.credentials;
     const { playlistId, userId } = request.payload;
 
