@@ -11,6 +11,7 @@ class CacheService {
     });
 
     this.client.on('error', (error) => {
+      // eslint-disable-next-line no-console
       console.error(error);
     });
     this.client.connect();
