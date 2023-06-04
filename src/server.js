@@ -2,6 +2,9 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const Inert = require('@hapi/inert');
+const path = require('path');
 
 // Exceptions
 const ClientError = require('./exceptions/ClientError');
@@ -50,6 +53,11 @@ const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
 
+// Uploads
+const uploads = require('./api/uploads');
+const StorageService = require('./services/storage/StorageService');
+const UploadsValidator = require('./validator/uploads');
+
 const init = async () => {
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
@@ -59,6 +67,7 @@ const init = async () => {
   const collaborationsService = new CollaborationsService();
   const playlistSongsService = new PlaylistSongsService(playlistsService, collaborationsService);
   const playlistSongActivitiesService = new PlaylistSongActivitiesService();
+  const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -74,6 +83,9 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: Inert,
     },
   ]);
 
@@ -153,6 +165,13 @@ const init = async () => {
         playlistsService,
         ProducerService,
         ExportsValidator,
+      },
+    },
+    {
+      plugin: uploads,
+      options: {
+        storageService,
+        UploadsValidator,
       },
     },
   ]);
