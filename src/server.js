@@ -57,6 +57,10 @@ const uploads = require('./api/uploads');
 const StorageService = require('./services/storage/StorageService');
 const UploadsValidator = require('./validator/uploads');
 
+// User album likes
+const userAlbumLikes = require('./api/user-album-likes');
+const UserAlbumLikesService = require('./services/postgres/UserAlbumLikesService');
+
 const init = async () => {
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
@@ -67,6 +71,7 @@ const init = async () => {
   const playlistSongsService = new PlaylistSongsService(playlistsService, collaborationsService);
   const playlistSongActivitiesService = new PlaylistSongActivitiesService();
   const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
+  const userAlbumLikesService = new UserAlbumLikesService();
 
   const server = Hapi.server({
     port: config.app.port,
@@ -169,6 +174,14 @@ const init = async () => {
         albumsService,
         storageService,
         UploadsValidator,
+      },
+    },
+    {
+      plugin: userAlbumLikes,
+      options: {
+        albumsService,
+        usersService,
+        userAlbumLikesService,
       },
     },
   ]);

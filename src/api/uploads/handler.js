@@ -10,20 +10,20 @@ class UploadsHandler {
   }
 
   async postUploadAlbumCoverHandler(request, h) {
-    const { cover } = request.payload;
-    this.uploadsValidator.validateAlbumCoverPayload(cover.hapi.headers);
+    const { data } = request.payload;
+    this.uploadsValidator.validateAlbumCoverPayload(data.hapi.headers);
     const { id } = request.params;
 
     await this.albumsService.getAlbumById(id);
 
-    const filename = await this.storageService.writeFile(cover, cover.hapi);
+    const filename = await this.storageService.writeFile(data, data.hapi);
+    const fileLocation = `http://${config.app.host}:${config.app.port}/upload/file/images/${filename}`;
+    await this.albumsService.updateAlbumCover(id, fileLocation);
 
     const response = h.response({
       status: 'success',
       message: 'Sampul berhasil diunggah',
-      data: {
-        fileLocation: `http://${config.app.host}:${config.app.port}/upload/images/albums-cover/${filename}`,
-      },
+      data: { fileLocation },
     });
     response.code(201);
     return response;
