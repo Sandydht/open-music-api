@@ -4,8 +4,9 @@ const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 class UserAlbumLikesService {
-  constructor() {
+  constructor(cacheService) {
     this.pool = new Pool();
+    this.cacheService = cacheService;
   }
 
   async addUserAlbumLike(albumId, userId) {
@@ -20,17 +21,31 @@ class UserAlbumLikesService {
 
     const result = await this.pool.query(query);
     if (!result.rowCount) throw new InvariantError('Gagal menyukai album');
+
+    await this.cacheService.delete(`user-album-like:${albumId}`);
     return result.rows[0].id;
   }
 
   async getUserAlbumLike(albumId) {
-    const query = {
-      text: 'SELECT * FROM user_album_likes WHERE album_id = $1',
-      values: [albumId],
-    };
+    try {
+      const result = await this.cacheService.get(`user-album-like:${albumId}`);
+      return {
+        source: 'cache',
+        likes: JSON.parse(result),
+      };
+    } catch (error) {
+      const query = {
+        text: 'SELECT id FROM user_album_likes WHERE album_id = $1',
+        values: [albumId],
+      };
 
-    const result = await this.pool.query(query);
-    return result.rowCount;
+      const result = await this.pool.query(query);
+      await this.cacheService.set(`user-album-like:${albumId}`, JSON.stringify(result.rowCount), 30000);
+      return {
+        source: 'database',
+        likes: result.rowCount,
+      };
+    }
   }
 
   async deleteUserAlbumLike(albumId, userId) {
@@ -40,7 +55,8 @@ class UserAlbumLikesService {
     };
 
     const result = await this.pool.query(query);
-    if (!result.rowCount) throw new NotFoundError('Gagal membatalkan like album. Id tidak ditemukan');
+    if (!result.rowCount) throw new NotFoundError('Batal suka album gagal. Id tidak ditemukan');
+    await this.cacheService.delete(`user-album-like:${albumId}`);
   }
 
   async verifyUserAlbumLike(albumId, userId) {
@@ -50,7 +66,7 @@ class UserAlbumLikesService {
     };
 
     const result = await this.pool.query(query);
-    if (result.rowCount) throw new InvariantError('Gagal menyukai album');
+    if (result.rowCount) throw new InvariantError('Gagal menyukai album. Anda sudah menyukainya');
   }
 }
 
