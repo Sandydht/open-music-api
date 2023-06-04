@@ -1,4 +1,4 @@
-const path = require('path');
+// const path = require('path');
 
 const routes = (handler) => [
   {
@@ -10,16 +10,7 @@ const routes = (handler) => [
         allow: 'multipart/form-data',
         multipart: true,
         output: 'stream',
-        maxBytes: 512000, // 512000 Byte
-      },
-    },
-  },
-  {
-    method: 'GET',
-    path: '/upload/{param*}',
-    handler: {
-      directory: {
-        path: path.resolve(__dirname, 'file'),
+        maxBytes: 500000, // 500KB
       },
     },
   },

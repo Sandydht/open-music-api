@@ -2,9 +2,8 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const Inert = require('@hapi/inert');
 const path = require('path');
+const config = require('./utils/config');
 
 // Exceptions
 const ClientError = require('./exceptions/ClientError');
@@ -70,8 +69,8 @@ const init = async () => {
   const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
 
   const server = Hapi.server({
-    port: process.env.PORT,
-    host: process.env.HOST,
+    port: config.app.port,
+    host: config.app.host,
     routes: {
       cors: {
         origin: ['*'],
@@ -84,19 +83,16 @@ const init = async () => {
     {
       plugin: Jwt,
     },
-    {
-      plugin: Inert,
-    },
   ]);
 
   // Authentication JWT strategy
   server.auth.strategy('musics_app', 'jwt', {
-    keys: process.env.ACCESS_TOKEN_KEY,
+    keys: config.app.accessToken,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      maxAgeSec: config.app.accessTokenAge,
     },
     validate: (artifacts) => ({
       isValid: true,
@@ -170,6 +166,7 @@ const init = async () => {
     {
       plugin: uploads,
       options: {
+        albumsService,
         storageService,
         UploadsValidator,
       },
