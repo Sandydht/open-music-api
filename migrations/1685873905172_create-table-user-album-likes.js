@@ -11,10 +11,12 @@ exports.up = (pgm) => {
     album_id: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'albums',
     },
     user_id: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'users',
     },
     created_at: {
       type: 'TEXT',

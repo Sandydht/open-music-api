@@ -11,10 +11,12 @@ exports.up = (pgm) => {
     playlist_id: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'playlists',
     },
     user_id: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'users',
     },
     created_at: {
       type: 'TEXT',

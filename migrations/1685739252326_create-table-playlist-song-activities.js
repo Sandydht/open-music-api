@@ -11,14 +11,17 @@ exports.up = (pgm) => {
     playlist_id: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'playlists',
     },
     song_id: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'songs',
     },
     user_id: {
       type: 'VARCHAR(50)',
       notNull: true,
+      references: 'users',
     },
     action: {
       type: 'TEXT',
