@@ -40,7 +40,7 @@ class UserAlbumLikesService {
       };
 
       const result = await this.pool.query(query);
-      await this.cacheService.set(`user-album-like:${albumId}`, JSON.stringify(result.rowCount), 30000);
+      await this.cacheService.set(`user-album-like:${albumId}`, JSON.stringify(result.rowCount));
       return {
         source: 'database',
         likes: result.rowCount,
