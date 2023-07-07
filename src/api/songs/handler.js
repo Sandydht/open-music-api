@@ -1,19 +1,19 @@
 const autoBind = require('auto-bind');
 
 class SongsHandler {
-  constructor(service, validator) {
-    this.service = service;
-    this.validator = validator;
+  constructor(songsService, SongsValidator) {
+    this.songsService = songsService;
+    this.songsValidator = SongsValidator;
     autoBind(this);
   }
 
   async postSongHandler(request, h) {
-    this.validator.validateSongPayload(request.payload);
-    const songId = await this.service.addSong(request.payload);
+    this.songsValidator.validateSongPayload(request.payload);
+    const songId = await this.songsService.addSong(request.payload);
 
     const response = await h.response({
       status: 'success',
-      message: 'Song berhasil ditambahkan',
+      message: 'Lagu berhasil ditambahkan',
       data: { songId },
     });
     response.code(201);
@@ -21,7 +21,7 @@ class SongsHandler {
   }
 
   async getSongsHandler(request) {
-    const songs = await this.service.getSongs(request.query);
+    const songs = await this.songsService.getSongs(request.query);
 
     return {
       status: 'success',
@@ -31,7 +31,7 @@ class SongsHandler {
 
   async getSongByIdHandler(request) {
     const { id } = request.params;
-    const song = await this.service.getSongById(id);
+    const song = await this.songsService.getSongById(id);
 
     return {
       status: 'success',
@@ -40,23 +40,23 @@ class SongsHandler {
   }
 
   async putSongByIdHandler(request) {
-    this.validator.validateSongPayload(request.payload);
+    this.songsValidator.validateSongPayload(request.payload);
     const { id } = request.params;
-    await this.service.editSongById(id, request.payload);
+    await this.songsService.editSongById(id, request.payload);
 
     return {
       status: 'success',
-      message: 'Song berhasil diperbarui',
+      message: 'Lagu berhasil diperbarui',
     };
   }
 
   async deleteSongByIdHandler(request) {
     const { id } = request.params;
-    await this.service.deleteSongById(id);
+    await this.songsService.deleteSongById(id);
 
     return {
       status: 'success',
-      message: 'Song berhasil dihapus',
+      message: 'Lagu berhasil dihapus',
     };
   }
 }
