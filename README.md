@@ -2,7 +2,7 @@
 This project was created with [Hapi Framework](https://hapi.dev/)
 
 ## Table of Contents
-* [How to Setup](#how-to-run)
+* [How to Setup](#how-to-setup)
 * [How to Run](#how-to-run)
 * [Libraries](#libraries)
 * [Must to Know](#must-to-know)
