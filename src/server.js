@@ -2,6 +2,9 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
+const path = require('path');
+const config = require('./utils/config');
 
 // Exceptions
 const ClientError = require('./exceptions/ClientError');
@@ -50,19 +53,35 @@ const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
 
+// Uploads
+const uploads = require('./api/uploads');
+const StorageService = require('./services/storage/StorageService');
+const UploadsValidator = require('./validator/uploads');
+
+// User album likes
+const userAlbumLikes = require('./api/user-album-likes');
+const UserAlbumLikesService = require('./services/postgres/UserAlbumLikesService');
+
+// Cache
+const CacheService = require('./services/redis/CacheService');
+
 const init = async () => {
+  const playlistsService = new PlaylistsService();
+  const collaborationsService = new CollaborationsService();
+  const cacheService = new CacheService();
+
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
-  const playlistsService = new PlaylistsService();
-  const collaborationsService = new CollaborationsService();
   const playlistSongsService = new PlaylistSongsService(playlistsService, collaborationsService);
   const playlistSongActivitiesService = new PlaylistSongActivitiesService();
+  const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
+  const userAlbumLikesService = new UserAlbumLikesService(cacheService);
 
   const server = Hapi.server({
-    port: process.env.PORT,
-    host: process.env.HOST,
+    port: config.app.port,
+    host: config.app.host,
     routes: {
       cors: {
         origin: ['*'],
@@ -75,16 +94,19 @@ const init = async () => {
     {
       plugin: Jwt,
     },
+    {
+      plugin: Inert,
+    },
   ]);
 
   // Authentication JWT strategy
   server.auth.strategy('musics_app', 'jwt', {
-    keys: process.env.ACCESS_TOKEN_KEY,
+    keys: config.app.accessToken,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      maxAgeSec: config.app.accessTokenAge,
     },
     validate: (artifacts) => ({
       isValid: true,
@@ -153,6 +175,22 @@ const init = async () => {
         playlistsService,
         ProducerService,
         ExportsValidator,
+      },
+    },
+    {
+      plugin: uploads,
+      options: {
+        albumsService,
+        storageService,
+        UploadsValidator,
+      },
+    },
+    {
+      plugin: userAlbumLikes,
+      options: {
+        albumsService,
+        usersService,
+        userAlbumLikesService,
       },
     },
   ]);
