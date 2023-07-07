@@ -10,7 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout test
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -21,7 +21,7 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
-      - name: Checkout
+      - name: Checkout build
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
