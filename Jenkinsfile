@@ -1,11 +1,21 @@
 /* Requires the Docker Pipeline plugin */
 pipeline {
-  agent { docker { image 'node:18.16.0-alpine' } }
+  agent any
   stages {
-    stage('test') {
-      steps {
-        sh 'npm install && npm run lint'
+     stage('Build') {
+        steps {
+          echo 'Building..'
+        }
       }
-    }
+      stage('Test') {
+        steps {
+          echo 'Testing..'
+        }
+      }
+      stage('Deploy') {
+        steps {
+          echo 'Deploying....'
+        }
+      }
   }
 }
