@@ -131,3 +131,6 @@ dist
 
 # Local file
 src/api/uploads/file
+
+# Jetbrains
+.idea
